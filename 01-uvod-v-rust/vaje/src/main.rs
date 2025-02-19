@@ -78,9 +78,22 @@ fn iteraction(mut start: u32, fun: fn(u32) -> u32, cond: fn(u32) -> bool) -> u32
 /// 4. Če ni, izberemo nov interval [a, b] glede na predznak f(c)
 /// 5. Ponavljamo korake 2-4
 
+fn abs(x: f64) -> f64 {
+    if x >= 0. {
+        return x;
+    } else {
+        return -x;
+    }
+}
+
 fn bisection(mut a: f64, mut b: f64, fun: fn(f64) -> f64, prec: f64) -> f64 {
-    let mut c = (a + b) / 2;
-        
+    if abs(fun(a)) < prec {
+        return a
+    } else if abs(fun(b)) < prec {
+        return b
+    }
+    let mut c = (a + b) / 2.;
+
 }
 
 // /// ------------------------------------------------------------------------------------------------
