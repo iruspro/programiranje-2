@@ -33,24 +33,26 @@ fn is_leap(year: u32) -> bool {
 type Date = (u32, u32, u32);
 
 fn get_number_of_days_in(month: u32, year: u32) -> u32 {
+    let mut number_of_days = 0;
+
     if month == 1 || month == 3 || month == 5 || month == 7 || month == 8 || month == 10 || month == 12 {
-        return 31;
+        number_of_days = 31;
     } else if month == 4 || month == 6 || month == 9 || month == 11 {
-        return 30;
+        number_of_days = 30;
     } else if month == 2 {
         if is_leap(year) {
-            return 29;
+            number_of_days = 29;
         } else {
-            return 28;
+            number_of_days = 28;
         }
-    } else {
-        return 0;
-    }
+    } 
+    
+    return number_of_days
 }
 
 fn is_correct_date(date: Date) -> bool {
     let (day, month, year) = date;
-    return 1 <= day && day <= get_number_of_days_in(month, year) && 1 <= month && month <= 12
+    return (1 <= day) && (day <= get_number_of_days_in(month, year)) && (1 <= month) && (month <= 12)
 }
 
 /// ------------------------------------------------------------------------------------------------
@@ -87,93 +89,196 @@ fn abs(x: f64) -> f64 {
 }
 
 fn bisection(mut a: f64, mut b: f64, fun: fn(f64) -> f64, prec: f64) -> f64 {
-    if abs(fun(a)) < prec {
-        return a
-    } else if abs(fun(b)) < prec {
-        return b
+    let mut middle = (a + b) / 2.;
+    while abs(fun(middle)) >= prec && b - a >= prec {
+        if fun(a) * fun(middle) < 0. {
+            b = middle;
+            middle = (a + middle) / 2.;
+        } else {
+            a = middle;
+            middle = (middle + b) / 2.;
+        }
     }
-    let mut c = (a + b) / 2.;
-
+    middle    
 }
 
-// /// ------------------------------------------------------------------------------------------------
+/// ------------------------------------------------------------------------------------------------
+/// Napišite funkcijo `fn mat_mul(a: [[u32; 2]; 2], b: [[u32; 2]; 2]) -> [[u32; 2]; 2]`, ki matriki `a` in `b` zmnoži in vrne rezultat
 
-// /// Popravite igro ugibanja iz prejšnje naloge, da bo delovala sledeče
-// /// Uporabnika sprašujemo po novi številki, vse dokler so števila, ki jih vpisuje del nekega aritmetičnega zaporedja
-// /// Če uporabnik vpiše neveljavno število to ni napaka, program za pogoj aritmetičnega zaporedja upošteva samo veljavno vpisana števila.
+fn mat_mul(a: [[u32; 2]; 2], b: [[u32; 2]; 2]) -> [[u32; 2]; 2] {
+    let a11 = a[0][0] * b[0][0] + a[0][1] * b[1][0];
+    let a12 = a[0][0] * b[0][1] + a[0][1] * b[1][1];
+    let a21 = a[1][0] * b[0][0] + a[1][1] * b[1][0];
+    let a22 = a[1][0] * b[0][1] + a[1][1] * b[1][1];
+    [[a11, a12], [a21, a22]]
+}
 
-// fn guessing_game() {
-//     panic!("Not implemented");
-// }
+/// ------------------------------------------------------------------------------------------------
+/// Napišite funkcijo `ordered`, ki sprejme tabelo števil in vrne `true`, če so števila urejena (padajoče ali naraščajoče) in `false` sicer.
 
-// /// ------------------------------------------------------------------------------------------------
-// /// Napišite funkcijo `fn mat_mul(a: [[u32; 2]; 2], b: [[u32; 2]; 2]) -> [[u32; 2]; 2]`, ki matriki `a` in `b` zmnoži in vrne rezultat
+fn ordered(arr: &[u32]) -> bool {
+    let arr_len = arr.len();
+    let mut i = 0;
+    while i + 1 < arr_len {
+        if arr[i] > arr[i + 1] {
+            return false
+        };
+        i = i + 1;
+    };
+    true
+}
 
-// fn mat_mul(a: [[u32; 2]; 2], b: [[u32; 2]; 2]) -> [[u32; 2]; 2] {
-//     panic!("Not implemented");
-// }
+fn vsebuje<T : PartialEq>(v: &Vec<T>, x : &T) -> bool {
+    for y in v {
+      if x == y {
+        return true
+      }
+    }
+    return false
+}
 
-// /// ------------------------------------------------------------------------------------------------
-// /// Napišite funkcijo `ordered`, ki sprejme tabelo števil in vrne `true`, če so števila urejena (padajoče ali naraščajoče) in `false` sicer.
+/// ------------------------------------------------------------------------------------------------
+/// Hitro potenciranje
+/// Napišite funkcijo `fn pow(mut x: u32, mut n: u32) -> u32`, ki izračuna `x` na potenco `n` v času O(log n)
+/// Hitro potenciranje izgleda tako:
+/// 1. Če je `n` sodo, potem je `x^n = (x^(n/2))^2`
+/// 2. Če je `n` liho, potem je `x^n = (x^2)^(n/2)`
+/// 3. Če je `n = 0`, potem je `x^n = 1`
 
-// fn ordered(arr: &[u32]) -> bool {
-//     panic!("Not implemented");
-// }
+fn pow(mut x: u32, mut n: u32) -> u32 {
+    if n == 0 {
+        return 1
+    }
 
-// fn vsebuje<T : PartialEq>(v: &Vec<T>, x : &T) -> bool {
-//     for y in v {
-//       if x == y {
-//         return true
-//       }
-//     }
-//     return false
-// }
+    if n % 2 == 0 {
+        pow(x * x, n / 2)
+    } else {
+        x * pow(x * x, n / 2)
+    }
+}
 
-// /// ------------------------------------------------------------------------------------------------
-// /// Hitro potenciranje
-// /// Napišite funkcijo `fn pow(mut x: u32, mut n: u32) -> u32`, ki izračuna `x` na potenco `n` v času O(log n)
-// /// Hitro potenciranje izgleda tako:
-// /// 1. Če je `n` sodo, potem je `x^n = (x^(n/2))^2`
-// /// 2. Če je `n` liho, potem je `x^n = (x^2)^(n/2)`
-// /// 3. Če je `n = 0`, potem je `x^n = 1`
+/// ------------------------------------------------------------------------------------------------
+/// Prepišite hitro potenciranje v iterativno obliko
 
-// /// ------------------------------------------------------------------------------------------------
-// /// Prepišite hitro potenciranje v iterativno obliko
+fn pow_iter(mut x: u32, mut n: u32) -> u32 {
+    let mut result = 1;
+    while n != 0 {
+        if n % 2 == 1 {
+            result = result * x;
+            n = n - 1;
+        }
+        x = x * x;
+        n = n / 2;
+    }
+    result
+}
 
-// /// ------------------------------------------------------------------------------------------------
-// /// Hitro potenciranje deluje tudi, če nas zanima samo ostanek po deljenju z nekim številom `m`
-// /// Napišite funkcijo `fn pow_mod(mut x: u32, mut n: u32, m: u32) -> u32`, ki izračuna `x` na potenco `n` in vrne ostanek po deljenju z `m`
-// /// Postopek je enak, le da pri vsakem izračunu vrnemo ostanek pri deljenju z `m`
+/// ------------------------------------------------------------------------------------------------
+/// Hitro potenciranje deluje tudi, če nas zanima samo ostanek po deljenju z nekim številom `m`
+/// Napišite funkcijo `fn pow_mod(mut x: u32, mut n: u32, m: u32) -> u32`, ki izračuna `x` na potenco `n` in vrne ostanek po deljenju z `m`
+/// Postopek je enak, le da pri vsakem izračunu vrnemo ostanek pri deljenju z `m`
+fn pow_mod(mut x: u32, mut n: u32, m: u32) -> u32 {
+    if n == 0 {
+        return x % m
+    }
 
-// /// ------------------------------------------------------------------------------------------------
-// /// Urejanje z izbiranjem
-// /// Napišite funkcijo `fn selection_sort(arr: &mut [u32])`, ki uredi tabelo `arr` z uporabo algoritma urejanja z izbiranjem
+    if n % 2 == 0 {
+        pow_mod(x * x, n / 2, m) % m
+    } else {
+        (x * pow_mod(x * x, n / 2, m)) % m
+    }
+}
 
-// fn selection_sort(arr: &mut [u32]) {}
 
-// /// ------------------------------------------------------------------------------------------------
-// /// Napišite program, ki izpiše piramido višine `n` iz zvezdic
+/// ------------------------------------------------------------------------------------------------
+/// Urejanje z izbiranjem
+/// Napišite funkcijo `fn selection_sort(arr: &mut [u32])`, ki uredi tabelo `arr` z uporabo algoritma urejanja z izbiranjem
 
-// fn pyramid(n: u32) {
-//     panic!("Not implemented");
-// }
+fn selection_sort(arr: &mut [u32]) {
+    let length = arr.len();
+    let mut pos = 0;
+    
+    while pos < length {
+        let mut min = arr[pos];
+        let mut min_ind = pos;
+        let mut i = min_ind;
+        
+        while i < length {
+            let elem = arr[i];
+            if elem < min {
+                min = elem;
+                min_ind = i;
+            }
+            i += 1;
+        }
+        
+        if min_ind != pos {
+            let tmp = arr[pos];
+            arr[pos] = min;
+            arr[min_ind] = tmp;
+        }
+        
+        pos += 1;
+    }
+}
 
-// /// ------------------------------------------------------------------------------------------------
-// /// Napišite program, ki izpiše piramido črk angleške abecede višine `n`, lahkom predpostavite, da bo n največ 26.
-// ///      A
-// ///    A B A
-// ///   A B C B A
-// /// A B C D C B A
-// /// Napišite funkcijo `fn selection_sort(mut arr: [u32])`, ki uredi tabelo `arr` z uporabo algoritma urejanja z izbiranjem
+/// ------------------------------------------------------------------------------------------------
+/// Napišite program, ki izpiše piramido višine `n` iz zvezdic
+
+fn pyramid(n: u32) {
+    for i in 0..n {       
+        let spaces =  " ".repeat((n - (i + 1)) as usize);
+        let stars = "*".repeat((i * 2 + 1) as usize);
+        println!("{}{}", spaces, stars);
+    }
+}
+
+/// ------------------------------------------------------------------------------------------------
+/// Napišite program, ki izpiše piramido črk angleške abecede višine `n`, lahko predpostavite, da bo n največ 26.
+///      A
+///    A B A
+///   A B C B A
+/// A B C D C B A
+
+fn abc_pyramid(n: u32) {
+    let alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    let alphabet: Vec<char> = alphabet.chars().collect();
+
+    let mut j = 0;
+    while j < 2 * n + 1 {
+        print!{" "};
+        j += 1;
+    }
+
+    println!("A");
+    
+    for i in 0..n {
+        let mut j = 0;
+        while j < (n - (i + 1)) + (n - i) {
+            print!{" "};
+            j += 1;
+        }
+        
+        let mut k = 0;
+        while k <= (i * 2 + 1) / 2 {
+            print!{"{} ", alphabet[k as usize]};
+            k += 1;
+        } 
+
+        loop {
+            print!{"{} ", alphabet[k as usize]};
+            if k == 0 {
+                break
+            } else {
+                k -= 1
+            }
+        }
+        println!{""};
+    }
+}
 
 fn main() {
-    let a = fib(0, 1, 10);
-    println!("Result: {a}");
-
-    let b = is_leap(1900);
-    println!("Result: {b}");
-
-    println!("Result: {}", is_correct_date((40, 2, 1900)))
+    abc_pyramid(25);
 }
 
 #[cfg(test)]
@@ -188,5 +293,17 @@ mod tests {
 
     #[test]
     fn test_fib() {
+    }
+
+    #[test]
+    fn test_ordered() {
+        let result = ordered(&[]);
+        assert_eq!(result, true);
+        let result = ordered(&[1]);
+        assert_eq!(result, true);
+        let result = ordered(&[1, 1, 2, 3, 4, 5]);
+        assert_eq!(result, true);
+        let result = ordered(&[2, 1]);
+        assert_eq!(result, false);
     }
 }
