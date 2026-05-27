@@ -6,95 +6,102 @@ fn time_it<F: FnOnce() -> R, R>(f: F) -> Duration {
     start.elapsed()
 }
 
-fn on_stack() {
-    // Narišite shemo spreminjanja sklada in kopice
-    // Za vsako vrstico napiši, kolikokrat se v pomnilniku pojavi 13?
-    let mut a = [13; 100];
-    let mut b = a;
-    let q = String::from("13");
-    println!("{}", q);
-    let r = q;
-    let p = &r;
-    a[0] = 1;
-    {
-        let c = &b;
-        println!("{}", c[0]);
-    }
-    println!("{}", b[0]);
-    println!("{}", a[0]);
-    println!("{}", p);
-    println!("{}", r);
-    // println!("{}", q); // Razloži, zakaj to ne deluje
-}
+// fn on_stack() {
+//     // Narišite shemo spreminjanja sklada in kopice
+//     // Za vsako vrstico napiši, kolikokrat se v pomnilniku pojavi 13?
+//     let mut a = [13; 100];
+//     let mut b = a;
+//     let q = String::from("13");
+//     println!("{}", q);
+//     let r = q;
+//     let p = &r;
+//     a[0] = 1;
+//     {
+//         let c = &b;
+//         println!("{}", c[0]);
+//     }
+//     println!("{}", b[0]);
+//     println!("{}", a[0]);
+//     println!("{}", p);
+//     println!("{}", r);
+//     // println!("{}", q); // Razloži, zakaj to ne deluje
+// }
 
 /// Napišite funkcijo `swap`, ki zamenja vrednosti dveh celoštevilskih spremenljivk.
+
+fn swap(a: &mut i32, b: &mut i32) {
+    let tmp = *a;
+    *a = *b;
+    *b = tmp; 
+}
 fn test_swap() {
     // V spremenljivko `a` shranite vrednost 13, v spremenljivko `b` pa vrednost 42.
+    let mut a = 13;
+    let mut b = 42;
 
-    // println!("a: {}, b: {}", a, b);
+    println!("a: {}, b: {}", a, b);
     // Izpiše `a: 13, b: 42`.
 
     // Naredite swap s pomočjo pomožne funkcije `swap`.
-    // ...
-    //
-
-    // println!("a: {}, b: {}", a, b);
+    swap(&mut a, &mut b);
+    
+    println!("a: {}, b: {}", a, b);
     // Izpiše `a: 42, b: 13`.
 }
 
 /// Popravite zakomentiran del spodnje funkcije, da bo deloval
 fn str_own() {
-    // let x = String::from("Hello world");
-    // let y = x
-    // println!("{}, {}", x, y);
+    let x = String::from("Hello world");
+    let y = x.clone();
+    println!("{}, {}", x, y);
 }
 
 /// Popravite brez uporabe funkcije `clone`
 /// Namig: sklad in kopiranje na skladu - kodo lahko spremenite
 fn str_own2() {
-    // let x = (1, 2, (), String::from("Hello world"));
-    // let y = x;
-    // println!("{:?}, {:?}", x, y);
+    let x = (1, 2, (), "Hello world");
+    let y = x;
+    println!("{:?}, {:?}", x, y);
 }
 
 /// Popravite spodnji dve funkciji, da bosta delovali
 
 fn wrong() {
-    // let s = String::from("Hello World");
-    // print_str(s);
-    // println!("{}", s);
+    let s = String::from("Hello World");
+    print_str(&s);
+    println!("{}", s);
 }
 
-fn print_str(s: String) {
+fn print_str(s: &str) {
     println!("{}", s)
 }
 
 /// ------------------------------------------------------------------------------------------------
 /// Popravite spodnjo funkcijo, da bo delovala
 fn fn1() {
-    // let s = String::from("Hello ");
+    let s = String::from("Hello ");
 
-    // let s1 = s;
+    let mut s1 = s;
 
-    // s1.push_str("World!");
+    s1.push_str("World!");
 
-    // println!("Success!");
+    println!("Success!");
 }
 
 /// ------------------------------------------------------------------------------------------------
 /// Popravite spodnjo funkcijo, da bo delovala
 
 fn fn2() {
-    // let x = Box::new(5);
+    let x = Box::new(5);
 
-    // // Popravite zgolj tukaj vmes
+    // Popravite zgolj tukaj vmes
+    let mut y = x.clone();
+    //
+    *y = 4;
 
-    // //
-    // *y = 4;
+    assert_eq!(*x, 5);
 
-    // assert_eq!(*x, 5);
-
-    // println!("Success!");
+    println!("Success!");
 }
 
 /// ------------------------------------------------------------------------------------------------
@@ -109,7 +116,7 @@ fn fn3() {
     let _s = t.1;
 
     // Izpišite čim večji del t-ja.
-    println!("????????");
+    println!("{} {} {}", t.0, _s, t.2,);
 }
 
 /// ------------------------------------------------------------------------------------------------
@@ -117,6 +124,7 @@ fn fn3() {
 fn fn4() {
     let x = 5;
     // Izpišite naslov spremenljivke x
+    println!("{:p}", &x);
 }
 
 /// ------------------------------------------------------------------------------------------------
@@ -126,16 +134,16 @@ fn fn5() {
     let y = &x;
 
     // Popravite spodnjo vrstico, da bo bo enakost držala
-    // assert_eq!(13, y);
+    assert_eq!(13, *y);
 }
 
 /// ------------------------------------------------------------------------------------------------
 
 /// Popravite spodnjo funkcijo, funkcija `helper` se mora poklicati čim bolj učinkovito.
 fn fn6() {
-    let mut s = String::from("hello, ");
+    let s = String::from("hello, ");
 
-    // helper(s);
+    helper(&s);
 
     println!("Success!");
 }
@@ -149,7 +157,7 @@ fn helper(s: &String) {}
 fn fn7() {
     let mut s = String::from("hello, ");
 
-    // helper2(s);
+    helper2(&mut s);
 
     println!("Success!");
 }
@@ -162,15 +170,15 @@ fn helper2(s: &mut String) {
 
 /// Pojasnite, zakaj spodnja koda ne deluje
 fn fn8() {
-    // let mut s = String::from("hello, ");
+    let mut s = String::from("hello, ");
 
-    // let p = &mut s;
+    let p = &mut s;
 
-    // p.push_str("world");
+    p.push_str("world");
 
-    // println!("Success! {}", p);
-    // println!("Success! {}", s);
-    // p.push_str("!");
+    println!("Success! {}", p);
+    println!("Success! {}", s);
+    p.push_str("!");
 }
 
 /// ------------------------------------------------------------------------------------------------
@@ -178,28 +186,31 @@ fn fn8() {
 /// Pojasnite tudi zakaj je popravek ok
 
 fn fn9() {
-    // let mut s = String::from("hello");
+    let s = String::from("hello");
 
-    // let r1 = &mut s;
-    // let r2 = &mut s;
+    let r1 = &s;
+    let r2 = &s;
 
-    // println!("{}, {}", r1, r2);
+    println!("{}, {}", r1, r2);
 
-    // println!("Success!");
+    println!("Success!");
 }
 
 /// ------------------------------------------------------------------------------------------------
 fn fn10() {
-    // // Popravite spodnjo vrstico
-    // let s = String::from("hello, ");
+    // Popravite spodnjo vrstico
+    let mut s = String::from("hello, ");
 
-    // helper3(&mut s);
+    helper3(&mut s);
 
-    // println!("Success!");
+    println!("Success!");
 }
 
 fn helper3(s: &mut String) {}
 
 /// ------------------------------------------------------------------------------------------------
 
-fn main() {}
+fn main() {
+    test_swap();
+    fn4();
+}
