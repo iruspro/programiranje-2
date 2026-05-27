@@ -1,18 +1,32 @@
-use core::panic;
-
-/// Skupaj preverite in pokomentirajte kvize iz [učbenika](https://rust-book.cs.brown.edu/ch03-00-common-programming-concepts.html)
-
-/// ------------------------------------------------------------------------------------------------
+// use std::panic;
 
 /// Napišite funkcijo `fib`, ki sprejme začetna člena fibbonacijevega zaporedja, število `n` in vrne `n`-ti člen zaporedja
 
 fn fib(a0: u32, a1: u32, n: u32) -> u32 {
-    panic!("Not implemented");
+    if n == 0 {
+        a0
+    } else if n == 1 {
+        a1
+    } else {
+        fib(a1, a0 + a1, n - 1)
+    }
 }
 
 /// ------------------------------------------------------------------------------------------------
 
 /// Napišite funkcijo `je_prestopno`, ki za podano leto preveri, ali je prestopno
+
+fn is_leap(year: u32) -> bool {
+    if year % 4 == 0 {
+        if year % 100 == 0 && year % 400 != 0 {
+            false
+        } else {
+            true
+        }
+    } else {
+        false
+    }
+}
 
 /// ------------------------------------------------------------------------------------------------
 
@@ -21,13 +35,44 @@ fn fib(a0: u32, a1: u32, n: u32) -> u32 {
 // Dan, mesec, leto
 type Date = (u32, u32, u32);
 
+fn is_correct_date(date: Date) -> bool {
+    let (day, month, year) = date;
+
+    if month == 0 || month > 12 {
+        return false;
+    }
+
+    let mut num_of_days = 31;
+
+    if month == 4 || month == 6 || month == 9 || month == 11 {
+        num_of_days = 30;
+    } else if month == 2 {
+        if is_leap(year) {
+            num_of_days = 29;
+        } else {
+            num_of_days = 28;
+        }
+    }
+
+    if day == 0 || day > num_of_days {
+        false
+    } else {
+        true
+    }
+}
+
 /// ------------------------------------------------------------------------------------------------
 
 /// Napišite funkcijo `iteracija(mut start: u32, fun: fn(u32) -> u32, cond: fn(u32) -> bool) -> u32`, ki sprejme iteracijsko funkcijo, zaustavitveni pogoj in začetno vrednost.
 /// Iteracijsko funkcijo zaporedoma uporablja, dokler za rezultat ne velja zaustavitveni pogoj, in vrne prvi rezultat, ki zadošča zaustavitvenemu pogoju.
 
-fn iteracija(mut start: u32, fun: fn(u32) -> u32, cond: fn(u32) -> bool) -> u32 {
-    panic!("Not implemented");
+fn iteration(mut start: u32, fun: fn(u32) -> u32, cond: fn(u32) -> bool) -> u32 {
+    loop {
+        if cond(start) {
+            break start;
+        }
+        start = fun(start);
+    }
 }
 
 /// ------------------------------------------------------------------------------------------------
@@ -40,8 +85,23 @@ fn iteracija(mut start: u32, fun: fn(u32) -> u32, cond: fn(u32) -> bool) -> u32 
 /// 4. Če ni, izberemo nov interval [a, b] glede na predznak f(c)
 /// 5. Ponavljamo korake 2-4
 
-fn bisekcija(mut a: f64, mut b: f64, fun: fn(f64) -> f64, prec: f64) -> f64 {
-    panic!("Not implemented");
+fn bisection(mut a: f64, mut b: f64, fun: fn(f64) -> f64, prec: f64) -> f64 {
+    if fun(a) * fun(b) > 0. {
+        panic!("The function has the same sign at both ends of the interval");
+    }
+
+    loop {
+        let c = (a + b) / 2.;
+        let val = fun(c);
+        if b - a < prec || val.abs() < prec {
+            break c;
+        }
+        if fun(a) * fun(c) < 0. {
+            b = c;
+        } else {
+            a = c;
+        }
+    }
 }
 
 /// ------------------------------------------------------------------------------------------------
@@ -50,9 +110,9 @@ fn bisekcija(mut a: f64, mut b: f64, fun: fn(f64) -> f64, prec: f64) -> f64 {
 /// Uporabnika sprašujemo po novi številki, vse dokler so števila, ki jih vpisuje del nekega aritmetičnega zaporedja
 /// Če uporabnik vpiše neveljavno število to ni napaka, program za pogoj aritmetičnega zaporedja upošteva samo veljavno vpisana števila.
 
-fn guessing_game() {
-    panic!("Not implemented");
-}
+// fn guessing_game() {
+//     panic!("Not implemented");
+// }
 
 /// ------------------------------------------------------------------------------------------------
 /// Napišite funkcijo `fn mat_mul(a: [[u32; 2]; 2], b: [[u32; 2]; 2]) -> [[u32; 2]; 2]`, ki matriki `a` in `b` zmnoži in vrne rezultat
@@ -65,7 +125,27 @@ fn mat_mul(a: [[u32; 2]; 2], b: [[u32; 2]; 2]) -> [[u32; 2]; 2] {
 /// Napišite funkcijo `ordered`, ki sprejme tabelo števil in vrne `true`, če so števila urejena (padajoče ali naraščajoče) in `false` sicer.
 
 fn ordered(arr: &[u32]) -> bool {
-    panic!("Not implemented");
+    if arr.len() <= 1 {
+        return true;
+    }
+
+    let mut asc = true;
+    let mut desc = true;
+    for (i, &el) in arr.iter().enumerate() {
+        if i == 0 {
+            continue;
+        }
+        let prev = arr[i - 1];
+        if prev > el {
+            asc = false;
+        } else if prev < el {
+            desc = false;
+        }
+        if !(desc || asc) {
+            break;
+        }
+    }
+    return asc || desc;
 }
 
 /// ------------------------------------------------------------------------------------------------
@@ -88,21 +168,43 @@ fn ordered(arr: &[u32]) -> bool {
 /// Urejanje z izbiranjem
 /// Napišite funkcijo `fn selection_sort(arr: &mut [u32])`, ki uredi tabelo `arr` z uporabo algoritma urejanja z izbiranjem
 
-fn selection_sort(arr: &mut [u32]) {}
+fn selection_sort(arr: &mut [u32]) {
+    for i in 0..arr.len() {
+        let el = arr[i];
+        let mut min_idx = i;
+        for j in i..arr.len() {
+            if arr[j] < arr[min_idx] {
+                min_idx = j
+            }
+        }
+        arr[i] = arr[min_idx];
+        arr[min_idx] = el;
+    }
+}
 
 /// ------------------------------------------------------------------------------------------------
 /// Napišite program, ki izpiše piramido višine `n` iz zvezdic
 
 fn pyramid(n: u32) {
-    panic!("Not implemented");
+    if n == 0 {
+        return;
+    }
+
+    let max_stars = (2 * (n - 1)) + 1;
+    for i in 1..=n {
+        let n_stars = 2 * (i - 1) + 1;
+        let n_whitespaces = (max_stars - n_stars) / 2;
+        let stars = "*".repeat(n_stars as usize);
+        let whitespaces = " ".repeat(n_whitespaces as usize);
+        println!("{}{}{}", whitespaces, stars, whitespaces);
+    }
 }
 
-/// ------------------------------------------------------------------------------------------------
-/// Napišite program, ki izpiše piramido črk angleške abecede višine `n`, lahkom predpostavite, da bo n največ 26.
-///       A
-///     A B A
-///   A B C B A
-/// A B C D C B A
-/// Napišite funkcijo `fn selection_sort(mut arr: [u32])`, ki uredi tabelo `arr` z uporabo algoritma urejanja z izbiranjem
+// /// ------------------------------------------------------------------------------------------------
+// /// Napišite program, ki izpiše piramido črk angleške abecede višine `n`, lahkom predpostavite, da bo n največ 26.
+// ///       A
+// ///     A B A
+// ///   A B C B A
+// /// A B C D C B A
 
 fn main() {}
